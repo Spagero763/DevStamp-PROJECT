@@ -1,31 +1,21 @@
-import type {Metadata} from 'next';
-import './globals.css';
-import '@rainbow-me/rainbowkit/styles.css';
-import { Providers } from '@/components/Providers';
-import { Toaster } from '@/components/ui/toaster';
+import "./globals.css";
+import "@rainbow-me/rainbowkit/styles.css";
+import { Providers } from "@/wagmi";
 
-export const metadata: Metadata = {
-  title: 'DevStamp Frontend',
-  description: 'Stamp your favorite builders on the blockchain.',
+export const metadata = {
+  title: "DevStamp",
+  description: "Stamp builders onchain",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"></link>
-      </head>
-      <body className="font-body antialiased">
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

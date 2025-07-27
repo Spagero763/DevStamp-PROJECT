@@ -2,11 +2,7 @@
 
 import { useContractRead } from "wagmi";
 import { DEVSTAMP_ABI, DEVSTAMP_ADDRESS } from "@/lib/contract";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Calendar, MessageSquare, User } from "lucide-react";
-import { format } from "date-fns";
+import { useState } from "react";
 import { isAddress } from "viem";
 
 interface Stamp {
@@ -15,87 +11,45 @@ interface Stamp {
   timestamp: bigint;
 }
 
-interface StampListProps {
-  builderAddress: string;
-}
+export default function StampList() {
+  const [builder, setBuilder] = useState("");
 
-export default function StampList({ builderAddress }: StampListProps) {
-  const isValidAddress = isAddress(builderAddress);
+  const isValidAddress = isAddress(builder);
 
-  const { data: stamps, isLoading, isError, error } = useContractRead({
+  const { data: stamps } = useContractRead({
     address: DEVSTAMP_ADDRESS,
     abi: DEVSTAMP_ABI,
     functionName: "getStampsForBuilder",
-    args: [builderAddress as `0x${string}`],
+    args: [builder as `0x${string}`],
     enabled: isValidAddress,
+    watch: true,
   });
 
-  if (!isValidAddress) {
-    return (
-        <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Invalid Address</AlertTitle>
-            <AlertDescription>
-                Please enter a valid Ethereum wallet address.
-            </AlertDescription>
-        </Alert>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error Fetching Stamps</AlertTitle>
-        <AlertDescription>
-          {error?.message.split('\n')[0] || "Could not fetch stamps for this address."}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  if (!stamps || (stamps as Stamp[]).length === 0) {
-    return (
-      <Card className="text-center py-10">
-        <CardHeader>
-          <CardTitle>No Stamps Yet</CardTitle>
-          <CardDescription>This builder hasn't received any stamps. Be the first!</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Stamps for {`${builderAddress.slice(0, 6)}...${builderAddress.slice(-4)}`}</h3>
-      {(stamps as Stamp[]).map((stamp, index) => (
-        <Card key={index}>
-          <CardContent className="p-4 grid gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4"/>
-                <span className="font-mono">{`${stamp.stamper.slice(0, 6)}...${stamp.stamper.slice(-4)}`}</span>
-            </div>
-            <p className="font-semibold flex items-start gap-2">
-                <MessageSquare className="h-4 w-4 mt-1 shrink-0 text-muted-foreground"/>
-                <span>{stamp.reason}</span>
-            </p>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                <span>{format(new Date(Number(stamp.timestamp) * 1000), "PPP")}</span>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="bg-white p-4 rounded-xl shadow-md max-w-md mx-auto mt-6">
+      <h2 className="text-xl font-bold mb-4">View Stamps</h2>
+      <input
+        className="border p-2 mb-4 w-full rounded"
+        placeholder="Enter builder address"
+        value={builder}
+        onChange={(e) => setBuilder(e.target.value)}
+      />
+      {stamps && (stamps as Stamp[]).length > 0 ? (
+        <ul className="space-y-2">
+          {(stamps as any[]).map((stamp, idx) => (
+            <li
+              key={idx}
+              className="border bg-purple-50 text-purple-900 px-3 py-2 rounded"
+            >
+              <p><b>Stamper:</b> {stamp.stamper}</p>
+              <p><b>Reason:</b> {stamp.reason}</p>
+              <p><b>Timestamp:</b> {new Date(Number(stamp.timestamp) * 1000).toLocaleString()}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500 text-sm">{isValidAddress ? 'No stamps yet for this builder.' : 'Enter a valid address to see stamps.'}</p>
+      )}
     </div>
   );
 }
