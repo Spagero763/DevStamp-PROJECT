@@ -5,9 +5,8 @@ import { DEVSTAMP_ABI, DEVSTAMP_ADDRESS } from "@/lib/contract";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, Loader2, Stamp as StampIcon, AlertCircle } from "lucide-react";
+import { Loader2, Stamp as StampIcon, AlertCircle } from "lucide-react";
 import { isAddress } from "viem";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +20,7 @@ const formSchema = z.object({
 });
 
 export default function StampForm() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { toast } = useToast();
   const { data: hash, writeContract, isPending, error: writeError } = useWriteContract();
 
@@ -54,6 +53,7 @@ export default function StampForm() {
   React.useEffect(() => {
     if (isConfirmed) {
       toast({
+        variant: "default",
         title: "Stamp Successful!",
         description: "Your stamp has been recorded on the blockchain.",
       });
@@ -112,7 +112,7 @@ export default function StampForm() {
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4">
             <Button type="submit" disabled={isPending || !isConnected} className="w-full">
-              {isPending ? (
+              {isPending || isConfirming ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isConfirming ? 'Confirming...' : 'Stamping...'}

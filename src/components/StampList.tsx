@@ -1,6 +1,6 @@
 "use client";
 
-import { useContractRead } from "wagmi";
+import { useReadContract } from "wagmi";
 import { DEVSTAMP_ABI, DEVSTAMP_ADDRESS } from "@/lib/contract";
 import { useState } from "react";
 import { isAddress } from "viem";
@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Eye, Loader2, Info } from "lucide-react";
 
 interface Stamp {
-  stamper: `0x${string}`;
   reason: string;
   timestamp: bigint;
 }
@@ -19,13 +18,14 @@ export default function StampList() {
 
   const isValidAddress = isAddress(builder);
 
-  const { data: stamps, isLoading, isError, error } = useContractRead({
+  const { data: stamps, isLoading, isError, error, refetch } = useReadContract({
     address: DEVSTAMP_ADDRESS,
     abi: DEVSTAMP_ABI,
-    functionName: "getStampsForBuilder",
+    functionName: "getStamps",
     args: [builder as `0x${string}`],
-    enabled: isValidAddress,
-    watch: true,
+    query: {
+        enabled: isValidAddress,
+    }
   });
 
   const renderContent = () => {
@@ -42,14 +42,19 @@ export default function StampList() {
         return <p className="text-destructive text-sm">Error fetching stamps: {error?.message.split('\n')[0]}</p>
     }
 
-    if (!isValidAddress) {
+    if (!isValidAddress && builder !== '') {
         return (
             <div className="flex items-center text-muted-foreground text-sm">
                 <Info className="h-4 w-4 mr-2 shrink-0"/>
-                Enter a valid builder address to see their stamps.
+                Please enter a valid builder address to see their stamps.
             </div>
         )
     }
+    
+    if (!isValidAddress) {
+      return null;
+    }
+
 
     if (stamps && (stamps as Stamp[]).length > 0) {
       return (
@@ -59,9 +64,6 @@ export default function StampList() {
               key={idx}
               className="border bg-purple-50/50 p-3 rounded-lg text-sm"
             >
-              <p className="font-semibold truncate">
-                <span className="font-bold text-purple-900">From:</span> {stamp.stamper}
-              </p>
               <p className="text-gray-700 mt-1">
                 <span className="font-bold text-purple-900">Reason:</span> {stamp.reason}
               </p>
