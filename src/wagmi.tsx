@@ -9,7 +9,7 @@ import { ReactNode } from "react";
 
 const config = getDefaultConfig({
   appName: "DevStamp",
-  projectId: "YOUR_WALLETCONNECT_PROJECT_ID", // get from https://cloud.walletconnect.com
+  projectId: "8cab540cc4a4f3a8d0e4a5a964fb63b9", // get from https://cloud.walletconnect.com
   chains: [baseSepolia],
   transports: {
     [baseSepolia.id]: http(),

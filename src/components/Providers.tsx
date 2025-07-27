@@ -19,7 +19,7 @@ import { WagmiProvider } from 'wagmi';
 
 const config = getDefaultConfig({
   appName: 'DevStamp Frontend',
-  projectId: 'YOUR_PROJECT_ID', // Please replace with your WalletConnect Project ID
+  projectId: '8cab540cc4a4f3a8d0e4a5a964fb63b9', // Please replace with your WalletConnect Project ID
   chains: [mainnet, sepolia, polygon, optimism, arbitrum, base],
   ssr: true, 
 });
